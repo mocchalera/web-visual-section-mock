@@ -18,6 +18,7 @@ web-visual-section-mock/
     07_negative_examples.md
     08_prompt_templates.md
     09_main_visual_archetypes.md
+    10_visual_decomposition_for_web_build.md
     web_visual_agent_references_all.md
   assets/
     brief_template.md
@@ -36,6 +37,7 @@ The package must contain a single top-level folder with one `SKILL.md` manifest 
 - Split a full landing page into section-by-section images
 - Design hero, problem, benefit, features, pricing, FAQ, CTA, and footer visuals
 - Use person-led visuals as a strong default while intentionally switching to other motifs when stronger
+- Decompose reference comps into layer stack, full-bleed/container elements, alignment bases, and asset strategy before prompt writing
 - Apply Japanese typography patterns
 - Avoid cropped section screenshots and overstuffed page images
 - Diagnose weak or cheap-looking image prompts

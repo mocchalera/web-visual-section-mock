@@ -1,6 +1,6 @@
 ---
 name: web-visual-section-mock
-description: Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, graphic design patterns, color/photo/fashion direction, and preventing cropped or cramped full-page screenshots. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation.
+description: Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, reference comp layer/asset decomposition, graphic design patterns, color/photo/fashion direction, and preventing cropped or cramped full-page screenshots. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation.
 ---
 
 # Web Visual Section Mock Skill
@@ -17,6 +17,7 @@ This skill is optimized for:
 - Japanese typography-heavy visual direction
 - main visual archetype selection with person-led visuals as a strong default and other motifs chosen intentionally
 - graphic design and editorial composition patterns
+- implementation-aware visual decomposition for reference comps: layer stack, full-bleed vs container-bound elements, alignment bases, and asset strategy
 - bright, polished, advertising-quality art direction
 - preventing mid-section cropping, tiny text, and overstuffed vertical page images
 
@@ -52,14 +53,15 @@ Recommended reference order:
 
 1. `references/00_reference_index.md` — overview and selection rules
 2. `references/01_web_section_patterns.md` — which sections to create and what each should contain
-3. `references/02_web_layout_patterns.md` — WEB layout patterns
-4. `references/03_graphic_composition_patterns.md` — advertising / poster / editorial composition patterns
-5. `references/04_japanese_typography_patterns.md` — Japanese typography patterns
-6. `references/09_main_visual_archetypes.md` — person / product / UI / space / typography / abstract / data / artifact main visual selection
-7. `references/05_color_lighting_fashion_patterns.md` — color, photo, lighting, fashion direction
-8. `references/06_industry_tone_patterns.md` — industry-specific tone and cliché avoidance
-9. `references/07_negative_examples.md` — failure modes and fixes
-10. `references/08_prompt_templates.md` — prompt compiler templates
+3. `references/10_visual_decomposition_for_web_build.md` — layer stack, full-bleed/container ownership, alignment, and asset strategy for reference comps
+4. `references/02_web_layout_patterns.md` — WEB layout patterns
+5. `references/03_graphic_composition_patterns.md` — advertising / poster / editorial composition patterns
+6. `references/04_japanese_typography_patterns.md` — Japanese typography patterns
+7. `references/09_main_visual_archetypes.md` — person / product / UI / space / typography / abstract / data / artifact main visual selection
+8. `references/05_color_lighting_fashion_patterns.md` — color, photo, lighting, fashion direction
+9. `references/06_industry_tone_patterns.md` — industry-specific tone and cliché avoidance
+10. `references/07_negative_examples.md` — failure modes and fixes
+11. `references/08_prompt_templates.md` — prompt compiler templates
 
 If only one file can be read, use `references/web_visual_agent_references_all.md` as a fallback.
 
@@ -109,6 +111,10 @@ graphic_pattern:
 typography_pattern:
 color_lighting_direction:
 spacing_policy:
+layer_stack:
+width_ownership:
+alignment_basis:
+asset_strategy:
 split_decision:
 avoid:
 ```
@@ -145,11 +151,27 @@ Infer:
 - required sections
 - content that should be omitted or moved to another section
 
-### 4. Choose patterns deliberately
+### 4. Decompose complex reference visuals when useful
+
+When the user provides a design comp, screenshot, generated reference image, or coding-oriented design commentary, use `references/10_visual_decomposition_for_web_build.md` before writing the final visual prompt. Keep the output as visual direction, not final HTML/CSS implementation.
+
+For each complex section, decide:
+
+- layer stack from background to foreground
+- full-bleed elements vs container-bound elements
+- alignment basis such as container left edge, center line, subject face, or CTA baseline
+- which photo assets should be regenerated as clean background plates or transparent foreground cutouts
+- which decorations should be SVG/CSS candidates, such as curves, waves, underlines, arrows, icons, or oversized motifs
+- which readable copy, CTA, labels, and microcopy must remain real text rather than being fused into the background
+- which decorative elements may crop at the viewport edge, and which essential elements must never crop
+- which relationships must survive responsive changes
+
+### 5. Choose patterns deliberately
 
 For each section:
 
 - choose the section pattern from `01_web_section_patterns.md`
+- use `10_visual_decomposition_for_web_build.md` when the reference image has complex layers or the mock should later be coded
 - choose one layout pattern from `02_web_layout_patterns.md`
 - choose one graphic composition pattern from `03_graphic_composition_patterns.md`
 - choose one or two Japanese typography patterns from `04_japanese_typography_patterns.md`
@@ -160,7 +182,7 @@ For each section:
 
 Use person-led visuals as a strong default candidate, especially for Hero, Benefit, CTA, and services where trust, emotion, aspiration, or personal credibility matter. Choose product/object, UI/product screen, place/space, typography-led, abstract graphic, data/process, or evidence/artifact-led visuals when that motif carries the message more sharply than a person photo. Avoid repeating the same generic person treatment across every section.
 
-### 5. Write or execute image prompts section by section
+### 6. Write or execute image prompts section by section
 
 When generating prompts, use clear blocks like:
 
@@ -198,7 +220,7 @@ LP全体を1枚に圧縮しない。
 途中で切り抜かれたスクリーンショットではなく、1つの完成したセクションとして見える必要がある。
 ```
 
-### 6. Typography requirements
+### 7. Typography requirements
 
 Japanese typography must be designed, not merely placed.
 
@@ -222,7 +244,7 @@ Avoid:
 - excessive text blocks
 - copying a known ad, magazine cover, or existing brand system
 
-### 7. Main visual, light, and styling requirements
+### 8. Main visual, light, and styling requirements
 
 Keep the visual bright, fresh, and advertising-grade.
 
@@ -260,7 +282,7 @@ Avoid:
 - vague abstract backgrounds with no message
 - heavy shadows and muddy tones
 
-### 8. Self-check before final output
+### 9. Self-check before final output
 
 Before responding, check each section:
 
@@ -274,6 +296,10 @@ Is the Japanese typography logo-like and intentionally designed?
 Is there exactly one primary visual archetype?
 If the visual is person-led, does it avoid generic stock-photo treatment?
 If the visual is not person-led, is the motif an intentional choice that beats a person photo for this message?
+If a reference comp is involved, is the layer order explicit?
+Are full-bleed elements and container-bound elements separated?
+Is the alignment basis clear?
+Are clean background plates, transparent subject cutouts, SVG/CSS decorations, and real text separated where useful?
 Is there enough whitespace?
 Is there at least one vivid accent color?
 Do photo, text, background, and decoration feel like one world?
