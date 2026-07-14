@@ -45,3 +45,16 @@ CTA, brand name, subject, and readable text must not be cut off.
 Prefer whitespace over dense layout.
 </generate_image>
 ```
+
+## Layered asset package output
+
+```text
+section_01_hero/
+- canonical composite: approved 1440x900 sRGB RGBA image
+- reconstruction layers: full-canvas background, subject, hand lettering, text snapshot, CTA snapshot
+- reusable assets: clean background plate, trimmed subject PNG, trimmed hand-lettering PNG, icon SVG, text spec
+- assembly manifest: integer coordinates, z-order, opacity, normal blend, layer-to-asset mapping
+- proof: recomposed.png, diff.png, fidelity-report.json
+- acceptance: same dimensions, pixel_diff_count = 0, max_channel_delta = 0, no full-frame-copy shortcut
+- status: complete_exact_editable
+```

@@ -1,6 +1,6 @@
 ---
 name: web-visual-section-mock
-description: Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, reference comp layer/asset decomposition, graphic design patterns, color/photo/fashion direction, and preventing cropped or cramped full-page screenshots. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation.
+description: Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, reference comp decomposition, editable layer/asset package generation with exact reconstruction, graphic design patterns, color/photo/fashion direction, and preventing cropped or cramped full-page screenshots. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation.
 ---
 
 # Web Visual Section Mock Skill
@@ -18,6 +18,7 @@ This skill is optimized for:
 - main visual archetype selection with person-led visuals as a strong default and other motifs chosen intentionally
 - graphic design and editorial composition patterns
 - implementation-aware visual decomposition for reference comps: layer stack, full-bleed vs container-bound elements, alignment bases, and asset strategy
+- editable layer/part generation for later design revision or HTML/CSS asset use, with an exact-reconstruction proof
 - bright, polished, advertising-quality art direction
 - preventing mid-section cropping, tiny text, and overstuffed vertical page images
 
@@ -45,6 +46,15 @@ When the task involves outputting a WEB page or LP as images:
 
 Decorative oversized typography or background graphics may be intentionally cropped at the edge, but readable content, CTA, the primary subject, and section structure must remain intact.
 
+When the user asks for editable layers, separated parts, or implementation-ready assets:
+
+1. Freeze the approved section image as the canonical composite before separating anything.
+2. Produce both canvas-aligned reconstruction layers and reusable trimmed assets where useful.
+3. Record canvas, coordinates, z-order, opacity, blend mode, and file mapping in an assembly manifest.
+4. Recompose the reconstruction layers and compare decoded RGBA pixels against the canonical composite.
+5. Require `pixel_diff_count = 0` and `max_channel_delta = 0`; a similar-looking image is not an exact reconstruction.
+6. If exactness cannot be measured or achieved, report `fidelity_unproven` or `blocked`, never `complete`.
+
 ## Progressive reference use
 
 Start with this `SKILL.md`. Read additional files from `references/` only when they are useful for the current task.
@@ -54,14 +64,15 @@ Recommended reference order:
 1. `references/00_reference_index.md` — overview and selection rules
 2. `references/01_web_section_patterns.md` — which sections to create and what each should contain
 3. `references/10_visual_decomposition_for_web_build.md` — layer stack, full-bleed/container ownership, alignment, and asset strategy for reference comps
-4. `references/02_web_layout_patterns.md` — WEB layout patterns
-5. `references/03_graphic_composition_patterns.md` — advertising / poster / editorial composition patterns
-6. `references/04_japanese_typography_patterns.md` — Japanese typography patterns
-7. `references/09_main_visual_archetypes.md` — person / product / UI / space / typography / abstract / data / artifact main visual selection
-8. `references/05_color_lighting_fashion_patterns.md` — color, photo, lighting, fashion direction
-9. `references/06_industry_tone_patterns.md` — industry-specific tone and cliché avoidance
-10. `references/07_negative_examples.md` — failure modes and fixes
-11. `references/08_prompt_templates.md` — prompt compiler templates
+4. `references/11_layered_asset_generation_and_reconstruction.md` — canonical composite lock, layer/part generation, manifest, and zero-diff verification
+5. `references/02_web_layout_patterns.md` — WEB layout patterns
+6. `references/03_graphic_composition_patterns.md` — advertising / poster / editorial composition patterns
+7. `references/04_japanese_typography_patterns.md` — Japanese typography patterns
+8. `references/09_main_visual_archetypes.md` — person / product / UI / space / typography / abstract / data / artifact main visual selection
+9. `references/05_color_lighting_fashion_patterns.md` — color, photo, lighting, fashion direction
+10. `references/06_industry_tone_patterns.md` — industry-specific tone and cliché avoidance
+11. `references/07_negative_examples.md` — failure modes and fixes
+12. `references/08_prompt_templates.md` — prompt compiler templates
 
 If only one file can be read, use `references/web_visual_agent_references_all.md` as a fallback.
 
@@ -91,6 +102,7 @@ Classify the user request as one of the following:
 - **multi-section website**: LP or full WEB page visual direction
 - **prompt rewrite**: improve an existing prompt
 - **critique / diagnosis**: identify why a visual prompt or generated image is failing
+- **layered asset package**: turn an approved section composite into editable parts and an exactly reconstructable asset bundle
 - **skill / reference editing**: revise this skill or its references
 
 For multi-section websites, create a section map before generating or writing prompts.
@@ -115,6 +127,12 @@ layer_stack:
 width_ownership:
 alignment_basis:
 asset_strategy:
+asset_output_mode:
+canonical_composite:
+reconstruction_layer_plan:
+reusable_asset_plan:
+assembly_manifest:
+fidelity_gate:
 split_decision:
 avoid:
 ```
@@ -220,7 +238,26 @@ LP全体を1枚に圧縮しない。
 途中で切り抜かれたスクリーンショットではなく、1つの完成したセクションとして見える必要がある。
 ```
 
-### 7. Typography requirements
+### 7. Generate a layered asset package when requested
+
+After the section composite is approved, use `references/11_layered_asset_generation_and_reconstruction.md`.
+
+Run the phase in this order:
+
+```text
+canonical composite lock
+layer ledger and ownership plan
+clean underlay/background plates
+canvas-aligned reconstruction layers
+trimmed reusable assets and editable text/SVG/CSS specs
+assembly manifest
+recomposition
+decoded-RGBA zero-diff verification
+```
+
+Generate lower layers without upper elements. Extract or derive icons, hand lettering, people, products, and decorations from the canonical composite when exact appearance matters. Keep an exact raster reconstruction layer even when also delivering editable text or SVG/CSS equivalents. Do not use a hidden full-frame copy or a large residual patch to fake editability.
+
+### 8. Typography requirements
 
 Japanese typography must be designed, not merely placed.
 
@@ -244,7 +281,7 @@ Avoid:
 - excessive text blocks
 - copying a known ad, magazine cover, or existing brand system
 
-### 8. Main visual, light, and styling requirements
+### 9. Main visual, light, and styling requirements
 
 Keep the visual bright, fresh, and advertising-grade.
 
@@ -282,7 +319,7 @@ Avoid:
 - vague abstract backgrounds with no message
 - heavy shadows and muddy tones
 
-### 9. Self-check before final output
+### 10. Self-check before final output
 
 Before responding, check each section:
 
@@ -300,6 +337,11 @@ If a reference comp is involved, is the layer order explicit?
 Are full-bleed elements and container-bound elements separated?
 Is the alignment basis clear?
 Are clean background plates, transparent subject cutouts, SVG/CSS decorations, and real text separated where useful?
+If layered output was requested, is the canonical composite immutable and identified?
+Do reconstruction layers and reusable assets have distinct roles?
+Does the assembly manifest define canvas, coordinates, z-order, opacity, and blend mode?
+Has decoded RGBA recomposition proven pixel_diff_count = 0 and max_channel_delta = 0?
+Is any residual correction layer limited to non-semantic edge repair rather than hiding whole content?
 Is there enough whitespace?
 Is there at least one vivid accent color?
 Do photo, text, background, and decoration feel like one world?
@@ -314,6 +356,7 @@ If any answer fails, revise by reducing information, increasing whitespace, shor
 - If the user asks for a final prompt, output the complete prompt directly.
 - If the user asks for section prompts, output separate section blocks.
 - If the user asks for actual images and an image tool is available, generate section images separately.
+- If the user asks for editable layers or coding assets, deliver or specify the canonical composite, reconstruction layers, reusable assets, assembly manifest, and fidelity report as one package.
 - If the user asks for critique, be direct and identify concrete failure modes.
 - If the user asks to revise this skill, preserve the progressive-disclosure structure: keep `SKILL.md` concise and place detailed reusable knowledge in `references/`.
 - Use Japanese by default when the user writes in Japanese.

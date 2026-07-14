@@ -1,6 +1,6 @@
 # web-visual-section-mock
 
-Agent Skill for high-quality WEB / LP visual mock art direction with section-by-section image generation, Japanese typography, person-led default visuals with intentional main visual archetype selection, graphic composition, color/photo/fashion direction, and strict anti-cropping / anti-stuffing rules.
+Agent Skill for high-quality WEB / LP visual mock art direction with section-by-section image generation, Japanese typography, intentional main visual archetype selection, editable layer/part asset packages with exact reconstruction, graphic composition, color/photo/fashion direction, and strict anti-cropping / anti-stuffing rules.
 
 ## Package structure
 
@@ -19,6 +19,7 @@ web-visual-section-mock/
     08_prompt_templates.md
     09_main_visual_archetypes.md
     10_visual_decomposition_for_web_build.md
+    11_layered_asset_generation_and_reconstruction.md
     web_visual_agent_references_all.md
   assets/
     brief_template.md
@@ -38,6 +39,7 @@ The package must contain a single top-level folder with one `SKILL.md` manifest 
 - Design hero, problem, benefit, features, pricing, FAQ, CTA, and footer visuals
 - Use person-led visuals as a strong default while intentionally switching to other motifs when stronger
 - Decompose reference comps into layer stack, full-bleed/container elements, alignment bases, and asset strategy before prompt writing
+- Generate reconstruction layers and reusable trimmed assets, then prove the manifest-driven recomposition matches the canonical image pixel-for-pixel
 - Apply Japanese typography patterns
 - Avoid cropped section screenshots and overstuffed page images
 - Diagnose weak or cheap-looking image prompts
@@ -50,6 +52,7 @@ Never compress a whole WEB page into one image.
 Choose one main visual archetype per section.
 Use person-led visuals as a strong default hook; switch to another motif only when it is more intentional.
 When uncertain, choose whitespace or split the section.
+When layered output is requested, decoded RGBA must satisfy pixel_diff_count = 0 and max_channel_delta = 0; otherwise exact fidelity is unproven.
 ```
 
 ## Validation
