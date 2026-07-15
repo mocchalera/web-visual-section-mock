@@ -50,11 +50,14 @@ Prefer whitespace over dense layout.
 
 ```text
 section_01_hero/
-- canonical composite: approved 1440x900 sRGB RGBA image
-- reconstruction layers: full-canvas background, subject, hand lettering, text snapshot, CTA snapshot
-- reusable assets: clean background plate, trimmed subject PNG, trimmed hand-lettering PNG, icon SVG, text spec
-- assembly manifest: integer coordinates, z-order, opacity, normal blend, layer-to-asset mapping
-- proof: recomposed.png, diff.png, fidelity-report.json
-- acceptance: same dimensions, pixel_diff_count = 0, max_channel_delta = 0, no full-frame-copy shortcut
-- status: complete_exact_editable
+- canonical reference: approved 1440x900 image, reference_only=true
+- source surface topology: hero world = section_field; foreground product = floating_scene; a real card interior = contained_artwork
+- semantic units: copy-space-aware full_field_scene_plate and independently moving subject; a static device-card scene remains one card_artwork_plate
+- asset triage: raster units = raster_regenerate; heading/CTA = real_text; wave/icon = css_svg_rebuild
+- raster assets: newly generated full-field scene or clean background plate, independently regenerated transparent subject/scene PNG
+- code assets: text spec, SVG/CSS spec, responsive relationships
+- asset manifest: provenance, generation prompt, source topology evidence, four-edge policy, copy space/focal points, alpha mode, intended role, anchor, responsive relationship
+- proof: checkerboard/white/black/brand previews and asset-cleanliness-report.json
+- acceptance: no canonical crop/mask, one output unit per generation, no structural text or card chrome, complete contours/crop-safe plates, clean alpha edges where applicable, no invented opaque frame, topology/generation/integration agreement in the final consumer
+- status: complete_clean_assets
 ```

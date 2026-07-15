@@ -1,6 +1,6 @@
 ---
 name: web-visual-section-mock
-description: Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, reference comp decomposition, editable layer/asset package generation with exact reconstruction, graphic design patterns, color/photo/fashion direction, and preventing cropped or cramped full-page screenshots. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation.
+description: "Use for WEB/LP design mock image generation and art direction prompts: section-by-section website visuals, hero/CTA/features/pricing layouts, Japanese typography, main visual archetype selection, reference comp decomposition, and clean implementation asset regeneration. It decides how each visual owns or joins the Web surface before generation, then separates real text and CSS/SVG structure from full-field scenes, transparent objects/scenes, clean backgrounds, and static card artwork plates. Do not use for ordinary coding, generic copywriting, or completed HTML/CSS implementation."
 ---
 
 # Web Visual Section Mock Skill
@@ -18,7 +18,7 @@ This skill is optimized for:
 - main visual archetype selection with person-led visuals as a strong default and other motifs chosen intentionally
 - graphic design and editorial composition patterns
 - implementation-aware visual decomposition for reference comps: layer stack, full-bleed vs container-bound elements, alignment bases, and asset strategy
-- editable layer/part generation for later design revision or HTML/CSS asset use, with an exact-reconstruction proof
+- clean semantic-unit raster regeneration for later design revision or HTML/CSS asset use
 - bright, polished, advertising-quality art direction
 - preventing mid-section cropping, tiny text, and overstuffed vertical page images
 
@@ -48,12 +48,18 @@ Decorative oversized typography or background graphics may be intentionally crop
 
 When the user asks for editable layers, separated parts, or implementation-ready assets:
 
-1. Freeze the approved section image as the canonical composite before separating anything.
-2. Produce both canvas-aligned reconstruction layers and reusable trimmed assets where useful.
-3. Record canvas, coordinates, z-order, opacity, blend mode, and file mapping in an assembly manifest.
-4. Recompose the reconstruction layers and compare decoded RGBA pixels against the canonical composite.
-5. Require `pixel_diff_count = 0` and `max_channel_delta = 0`; a similar-looking image is not an exact reconstruction.
-6. If exactness cannot be measured or achieved, report `fidelity_unproven` or `blocked`, never `complete`.
+1. Freeze the approved section image as a visual reference, not as a pixel source for production assets.
+2. Group visible elements into the smallest **independently behaving semantic visual units**, then classify each unit as `raster_regenerate`, `css_svg_rebuild`, `real_text`, or `omit`.
+3. Generate raster assets only for elements whose photographic, illustrative, material, or textural detail cannot be reproduced efficiently in CSS/SVG.
+4. Regenerate every required raster unit independently. Use a `full_field_scene_plate` when the visual world should own the whole section and leave measured copy space; use `transparent_foreground` or `transparent_scene` when an object or coupled scene should float directly on the Web background; keep a static card interior—such as a person editorial photo, device mock scene, object still life, collage, or textured abstract—as one clean opaque `card_artwork_plate` when its members always move and scale together.
+5. Do not ship crops, masks, extracted pixels, or residual patches from the composite as reusable production assets.
+6. Do not raster-generate structural copy, CTA labels, functional UI, live data, simple icons, waves, blobs, rules, arrows, or other elements that need accessibility, interaction, updates, or independent responsive behavior. Decorative lettering and non-functional screen art may remain inside an artwork plate.
+7. Generate one **output visual unit** per image-generation call. That unit may contain several coupled objects; verify its declared members, excluded shell/text, completeness, crop safety, and handoff metadata.
+8. If the generator cannot emit alpha directly, generate the isolated asset on a new uniform high-contrast matte, remove only that newly generated matte, and inspect the edge. Never remove the original mock background and call the result regenerated.
+9. Before writing any raster prompt, lock the section's **source surface topology** as `section_field`, `floating_scene`, `contained_artwork`, `tone_merged_object`, or `source_visible_frame`. A section-field visual cannot be demoted into a centered image card; a floating scene cannot ship with an opaque rectangular background merely because the generator emitted one.
+10. Decide the **generation unit** and the **web-surface integration** separately. Every raster must declare exactly one integration mode: `alpha_floating`, `opaque_full_bleed`, `opaque_masked_merge`, `opaque_tone_matched`, or `intentional_frame`, plus the intended treatment of all four edges. An opaque artwork plate with baked outer whitespace is not implementation-ready merely because its internal subject is clean.
+11. Verify the final crop in its real consumer. If CSS owns the card background or padding, the raster must not also contribute an accidental panel, margin, or mismatched edge color. If the pixels contradict the locked topology, report `needs_surface_redesign` and return to image generation before HTML/CSS.
+12. Treat an approved topology change as a new asset-design revision. Record the affected units, old/new topology, source evidence, invalidated proofs, and a source-based bbox rebaseline; never preserve stale geometry or satisfy handoff with an invisible duplicate element.
 
 ## Progressive reference use
 
@@ -64,7 +70,7 @@ Recommended reference order:
 1. `references/00_reference_index.md` — overview and selection rules
 2. `references/01_web_section_patterns.md` — which sections to create and what each should contain
 3. `references/10_visual_decomposition_for_web_build.md` — layer stack, full-bleed/container ownership, alignment, and asset strategy for reference comps
-4. `references/11_layered_asset_generation_and_reconstruction.md` — canonical composite lock, layer/part generation, manifest, and zero-diff verification
+4. `references/11_layered_asset_generation_and_reconstruction.md` — clean asset triage, independent regeneration, transparency workflow, manifest, and cleanliness verification
 5. `references/02_web_layout_patterns.md` — WEB layout patterns
 6. `references/03_graphic_composition_patterns.md` — advertising / poster / editorial composition patterns
 7. `references/04_japanese_typography_patterns.md` — Japanese typography patterns
@@ -102,7 +108,7 @@ Classify the user request as one of the following:
 - **multi-section website**: LP or full WEB page visual direction
 - **prompt rewrite**: improve an existing prompt
 - **critique / diagnosis**: identify why a visual prompt or generated image is failing
-- **layered asset package**: turn an approved section composite into editable parts and an exactly reconstructable asset bundle
+- **layered asset package**: use an approved section composite as reference and regenerate only the raster-required parts as clean implementation assets
 - **skill / reference editing**: revise this skill or its references
 
 For multi-section websites, create a section map before generating or writing prompts.
@@ -121,6 +127,7 @@ main_visual_archetype:
 layout_pattern:
 graphic_pattern:
 typography_pattern:
+typography_source_impression: block width/height, max line width, glyph height, tracking, line advance, ink density, jump ratios, desktop/mobile scale bounds
 color_lighting_direction:
 spacing_policy:
 layer_stack:
@@ -129,10 +136,23 @@ alignment_basis:
 asset_strategy:
 asset_output_mode:
 canonical_composite:
-reconstruction_layer_plan:
-reusable_asset_plan:
-assembly_manifest:
-fidelity_gate:
+asset_triage: raster_regenerate | css_svg_rebuild | real_text | omit
+generation_unit: full_field_scene_plate | clean_background_plate | transparent_foreground | transparent_scene | card_artwork_plate | code_native
+source_surface_topology: section_field | floating_scene | contained_artwork | tone_merged_object | source_visible_frame
+surface_integration: alpha_floating | opaque_full_bleed | opaque_masked_merge | opaque_tone_matched | intentional_frame
+field_owner: section_asset | css | shared | card_content
+edge_policy: top/right/bottom/left = alpha | bleed | mask | tone_match | source_frame | not_visible
+copy_space_rois:
+source_topology_evidence:
+surface_owner: css | asset | shared
+outer_whitespace_owner: css | asset | none
+unit_members:
+independent_behavior: motion | responsive_recompose | reuse | interaction | content_update | none
+keep_together_reason:
+raster_generation_plan:
+code_rebuild_plan:
+asset_manifest:
+cleanliness_gate:
 split_decision:
 avoid:
 ```
@@ -183,6 +203,8 @@ For each complex section, decide:
 - which readable copy, CTA, labels, and microcopy must remain real text rather than being fused into the background
 - which decorative elements may crop at the viewport edge, and which essential elements must never crop
 - which relationships must survive responsive changes
+- whether the raster should own the section field, float without a rectangle, fill a real card interior, merge by mask/tone, or retain a source-visible frame
+- whether a full-field scene needs measured text-safe copy space or a floating scene needs true alpha including its soft shadow
 
 ### 5. Choose patterns deliberately
 
@@ -245,17 +267,25 @@ After the section composite is approved, use `references/11_layered_asset_genera
 Run the phase in this order:
 
 ```text
-canonical composite lock
-layer ledger and ownership plan
-clean underlay/background plates
-canvas-aligned reconstruction layers
-trimmed reusable assets and editable text/SVG/CSS specs
-assembly manifest
-recomposition
-decoded-RGBA zero-diff verification
+canonical visual reference lock
+semantic visual-unit grouping, then asset triage
+source surface-topology lock and four-edge policy
+one-output-unit-per-generation prompt plan
+full-field scene-plate regeneration with measured copy space where the visual owns the section
+clean background plate regeneration
+transparent foreground or coupled transparent-scene regeneration where art floats on the Web field
+opaque card artwork plate regeneration where internal parts stay coupled
+text and CSS/SVG implementation specs
+asset manifest with provenance and placement relationships
+cleanliness, alpha-edge, completeness, and contamination verification
+in-context surface verification for alpha, edge bands, padding ownership, mask/bleed/tone continuity, and intentional frames
+consumer-truth proof using the actual full-field, floating-scene, or card-content target
+topology-revision ledger and source-based rebaseline when implementation feedback changes the surface relationship
 ```
 
-Generate lower layers without upper elements. Extract or derive icons, hand lettering, people, products, and decorations from the canonical composite when exact appearance matters. Keep an exact raster reconstruction layer even when also delivering editable text or SVG/CSS equivalents. Do not use a hidden full-frame copy or a large residual patch to fake editability.
+The default output mode for later implementation is `layered_clean`. The canonical composite guides identity, pose, palette, light, camera, and composition, but its pixels are not reusable output. Regenerate each raster-required semantic unit independently. Do not split coupled objects merely because their silhouettes are distinguishable; split only for source-evidenced motion, responsive recomposition, reuse, interaction, content updates, accessibility, or independent layering. Do not use a hidden crop, full-frame copy, masked composite fragment, or residual patch to fake editability.
+
+Optional pixel-exact reconstruction may be kept only as a separate audit/reference package when explicitly requested. It must never substitute for, be mixed into, or be reported as the clean production asset set.
 
 ### 8. Typography requirements
 
@@ -271,6 +301,8 @@ Prioritize:
 - logo-like lockups
 - generous spacing
 - meaningful English labels only
+
+For every `fv-critical` or `section-critical` heading, measure the source impression before handoff: block width/height relative to the source frame, maximum line width, visible glyph height, tracking in `em`, line advance, interline gap, ink density, heading-to-lead/body/label jump ratios, and desktop/mobile scale bounds. A pattern label such as “bold gothic” is art direction, not an implementation contract. Do not copy one bbox/type spec across distinct section comps unless source evidence proves a shared lockup system.
 
 Avoid:
 
@@ -337,11 +369,27 @@ If a reference comp is involved, is the layer order explicit?
 Are full-bleed elements and container-bound elements separated?
 Is the alignment basis clear?
 Are clean background plates, transparent subject cutouts, SVG/CSS decorations, and real text separated where useful?
-If layered output was requested, is the canonical composite immutable and identified?
-Do reconstruction layers and reusable assets have distinct roles?
-Does the assembly manifest define canvas, coordinates, z-order, opacity, and blend mode?
-Has decoded RGBA recomposition proven pixel_diff_count = 0 and max_channel_delta = 0?
-Is any residual correction layer limited to non-semantic edge repair rather than hiding whole content?
+If layered output was requested, is the canonical composite used only as a visual reference?
+Has every element been classified as raster_regenerate, css_svg_rebuild, real_text, or omit?
+Were elements grouped by independent implementation behavior before classification?
+Does every split have a source- or product-evidenced motion, responsive, reuse, interaction, update, accessibility, or layering reason?
+Are static card interiors kept as one artwork plate when splitting would damage light, shadow, perspective, texture, or contact relationships?
+Are all production raster files independently regenerated rather than cropped or masked from the composite?
+Was each output visual unit generated alone, with no structural text, functional UI, card chrome, or unrelated decoration?
+Do foreground assets have clean transparency and complete formerly occluded shapes?
+Do background plates contain no upper-layer subjects or fused readable text?
+Are simple shapes, icons, waves, arrows, rules, and readable copy assigned to CSS/SVG or real text instead of raster output?
+Does the asset manifest record reference, generation prompt, output file, alpha mode, intended role, anchor, and responsive relationship?
+Does every critical heading carry source-measured scale, spacing, density, jump ratios, and responsive scale bounds rather than a repeated generic type spec?
+Does every raster declare a surface-integration mode separately from its generation unit?
+Was source surface topology decided before the raster prompt, with source evidence and a four-edge policy?
+If the visual owns the section world, does it bleed as a full-field scene plate instead of appearing inside an invented image card?
+If an object, exploded diagram, or collage floats on the Web background, is it a true transparent scene with its shadow rather than an opaque rectangle?
+Was the actual PNG inspected for alpha, uniform outer bands, content bounds, and edge color, then reviewed inside its final consumer without double padding or a color seam?
+Is the integration proof produced by the visible element that will paint the asset, rather than a hidden measurement proxy?
+If feedback changed the topology, were affected assets, crops, measurements, and downstream QA explicitly invalidated and rebuilt from source evidence?
+If the generated pixels contradict the topology, was the asset sent back to regeneration before HTML/CSS?
+Did the cleanliness report verify isolation, alpha_edge_contamination, background contamination, and completeness?
 Is there enough whitespace?
 Is there at least one vivid accent color?
 Do photo, text, background, and decoration feel like one world?
@@ -356,7 +404,7 @@ If any answer fails, revise by reducing information, increasing whitespace, shor
 - If the user asks for a final prompt, output the complete prompt directly.
 - If the user asks for section prompts, output separate section blocks.
 - If the user asks for actual images and an image tool is available, generate section images separately.
-- If the user asks for editable layers or coding assets, deliver or specify the canonical composite, reconstruction layers, reusable assets, assembly manifest, and fidelity report as one package.
+- If the user asks for editable layers or coding assets, deliver or specify the canonical visual reference, asset-triage ledger, independently regenerated raster assets, real-text and CSS/SVG specs, asset manifest, and cleanliness report as one package.
 - If the user asks for critique, be direct and identify concrete failure modes.
 - If the user asks to revise this skill, preserve the progressive-disclosure structure: keep `SKILL.md` concise and place detailed reusable knowledge in `references/`.
 - Use Japanese by default when the user writes in Japanese.

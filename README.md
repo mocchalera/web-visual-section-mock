@@ -1,6 +1,6 @@
 # web-visual-section-mock
 
-Agent Skill for high-quality WEB / LP visual mock art direction with section-by-section image generation, Japanese typography, intentional main visual archetype selection, editable layer/part asset packages with exact reconstruction, graphic composition, color/photo/fashion direction, and strict anti-cropping / anti-stuffing rules.
+Agent Skill for high-quality WEB / LP visual mock art direction with section-by-section image generation, Japanese typography, intentional main visual archetype selection, and clean implementation asset regeneration. It freezes whether art owns the section field, floats on the Web background, or lives inside a real content frame before generation, then separates real text/CSS/SVG from full-field scenes, transparent scenes, clean backgrounds, and card artwork plates.
 
 ## Package structure
 
@@ -39,7 +39,7 @@ The package must contain a single top-level folder with one `SKILL.md` manifest 
 - Design hero, problem, benefit, features, pricing, FAQ, CTA, and footer visuals
 - Use person-led visuals as a strong default while intentionally switching to other motifs when stronger
 - Decompose reference comps into layer stack, full-bleed/container elements, alignment bases, and asset strategy before prompt writing
-- Generate reconstruction layers and reusable trimmed assets, then prove the manifest-driven recomposition matches the canonical image pixel-for-pixel
+- Regenerate only raster-required parts as copy-space-aware full-field scene plates, clean background plates, transparent foreground/scenes, or contained card artwork; keep readable text and CSS/SVG-rebuildable parts out of raster output
 - Apply Japanese typography patterns
 - Avoid cropped section screenshots and overstuffed page images
 - Diagnose weak or cheap-looking image prompts
@@ -52,7 +52,7 @@ Never compress a whole WEB page into one image.
 Choose one main visual archetype per section.
 Use person-led visuals as a strong default hook; switch to another motif only when it is more intentional.
 When uncertain, choose whitespace or split the section.
-When layered output is requested, decoded RGBA must satisfy pixel_diff_count = 0 and max_channel_delta = 0; otherwise exact fidelity is unproven.
+When layered output is requested, use the composite as reference only, classify every element before generation, and reject cropped, masked, contaminated, or multi-part raster outputs.
 ```
 
 ## Validation

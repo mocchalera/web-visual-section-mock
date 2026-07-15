@@ -569,3 +569,45 @@ Case Study、Brand Story、採用、教育系。
 - 全文同じサイズ
 - 情報が雑誌記事のように多すぎる
 - CTAが消える
+
+---
+
+## 22. 実装引き継ぎ用 source impression profile
+
+タイポグラフィパターン名だけでは、実装時の印象を固定できません。「太めのゴシック」を `font-weight: 950` と強い負の字間へ置き換えると、元カンプにあった呼吸や品位が失われます。また、フォントサイズの数値だけを渡しても、画面に対する占有率や本文とのジャンプ率が弱ければ主役性は再現できません。
+
+`fv-critical` と `section-critical` の見出しごとに、次をsource frameから計測して引き渡します。
+
+```text
+source_frame_width / source_frame_height
+source_block_width_ratio / source_block_height_ratio
+source_max_line_width_ratio
+source_visible_glyph_height_ratio
+source_tracking_em
+source_line_advance_ratio
+source_interline_gap_px
+source_ink_density
+viewport_max_size_ratio
+jump_ratio_to_lead / jump_ratio_to_body / jump_ratio_to_label
+desktop_max_size_px / mobile_min_size_px
+evidence_crop_path
+```
+
+### 判定順序
+
+1. 文字の骨格と太さのクラスを合わせる。
+2. 見出しブロックが画面幅・セクション高に占める割合を合わせる。
+3. 目に見えるglyph高と最大行幅を合わせる。
+4. 字間、行送り、行間の空気を合わせる。
+5. lead/body/labelとのジャンプ率を合わせる。
+6. ink densityを比較し、黒い塊になりすぎていないかを見る。
+7. desktop最大域とmobile最小域の両方を実ブラウザで測る。
+
+### 禁止
+
+- 異なるsection compへ同じbbox、weight、tracking、leadingをコピーして計測済みと扱う
+- パターン名だけを根拠に極端なweightや負のletter-spacingを選ぶ
+- desktopでカンプより小さい見出しを「読みやすいから」と自己承認する
+- mobileで一律の小さい見出しへ縮退し、セクション間のジャンプ率を消す
+
+複数セクションが同じタイポグラフィシステムを共有する場合も、各source cropを測ります。同一値を使うなら、偶然のコピーではなく共有ロックアップであることを示すsource evidenceを添えます。

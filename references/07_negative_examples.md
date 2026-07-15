@@ -269,33 +269,89 @@ LP全体を縮小サムネイルのように見せること
 
 ---
 
-## 10. レイヤー分けと再合成の失敗
+## 10. 切り抜きをレイヤー素材として納品する失敗
 
 ### NG
 
-- 背景、人物、装飾が別ファイルだが、重ねても元画像にならない
-- 各パーツを似た見た目で再生成しただけで、基準画像からずれている
-- 座標、z-order、opacity、blend modeが記録されていない
-- フル画像を最上位レイヤーに置き、レイヤー分けできたように見せている
-- 大きなresidual correction layerが人物、文字、カード、アイコンを丸ごと隠している
-- 目視、SSIM、PSNRだけで「完全再現」と報告している
-- SVG/CSS候補だけを残し、正確なラスターレイヤーを捨てている
+- 完成モックを矩形cropしただけの画像を「背景」「人物」「カード」と呼んでいる
+- マスクで人物を抜いたが、髪や服の縁に元背景色、文字片、装飾片が残っている
+- 他要素に隠れていた人物、商品、背景が欠けたままになっている
+- 読ませる文字、CTA、単純な線、波、矢印、アイコンまでPNGへ焼き込んでいる
+- 複数の独立パーツを1枚のsprite sheetとして再生成している
+- pixel差分0だけを根拠に、実装可能な素材だと報告している
 
 ### 原因
 
-- 完全再現用レイヤーと編集・実装用素材を混同している
-- 承認済み基準画像を固定していない
-- assembly manifestがない
-- デコード後RGBAの全ピクセル比較をしていない
+- 元モックをproduction assetのpixel sourceとして扱っている
+- `raster_regenerate` / `css_svg_rebuild` / `real_text` / `omit` の分類をしていない
+- 隠れている領域を再生成する必要を見落としている
+- 完全再現と、移動可能で汚染のない実装素材を混同している
 
 ### 修正
 
 - `11_layered_asset_generation_and_reconstruction.md` を使う
-- canonical compositeを固定する
-- 下層背景から生成し、上層素材を基準画像から抽出・派生する
-- reconstruction layersとreusable assetsを分ける
-- manifestどおり再合成し、`pixel_diff_count = 0` と `max_channel_delta = 0` を証明する
-- 検証できない場合は `fidelity_unproven` とし、完了扱いしない
+- canonical compositeは参照専用として固定する
+- 全要素を4分類し、画像固有の質感が必要な要素だけを `raster_regenerate` にする
+- まず「独立して動く・並べ替わる・再利用される・更新される」単位を決め、1回の生成につき1つの出力ビジュアル単位を再生成する
+- 人物や商品が単独で振る舞う場合は透過素材、背景は上層要素なしのクリーンプレートにする
+- 静的なカード内で一体の絵として見せる人物＋背景＋光、端末＋画面＋影、物体＋台座は `card_artwork_plate` としてまとめて再生成してよい
+- 文字は実テキスト、単純装飾はCSS/SVGへ渡す
+- checkerboard、白、黒、ブランド色でalpha edgeと背景汚染を検査する
+- 汚染や輪郭欠損があれば `needs_regeneration` とし、完了扱いしない
+
+---
+
+## 11. 見えている物体ごとに過分解する失敗
+
+### NG
+
+- 独立モーションもレスポンシブ再配置もないのに、ノートPCとスマートフォンを別PNGにする
+- 1つの静物画として成立している石・台座・接地影を別々に生成する
+- 抽象画を図形単位へ分解し、元の質感や空間関係を失う
+- 静的な端末画面までHTMLのスケルトンUIへ置き換え、見せたい絵を薄める
+- 「後で動かせるかもしれない」だけを分割理由にする
+
+### 原因
+
+- 視覚上の物体数と、実装上の独立単位を混同している
+- 画像生成の最小単位を原子パーツだと思い込んでいる
+- カード枠やラベルなどの構造と、カード内の鑑賞用アートワークを区別していない
+
+### 修正
+
+- カード枠、見出し、本文、ラベル、CTAはHTML/CSSで持つ
+- カード内部の静的一体構図は `card_artwork_plate` として1枚にまとめる
+- 分割する場合は、独立モーション、レスポンシブ再配置、再利用、操作、内容更新、重なり順制御のいずれかを `split_evidence` に記録する
+- 分割根拠がなければ、同じクリップ領域と同じ視覚目的を持つ要素はまとめる
+
+---
+
+## 12. Web面を決めず、不透明画像をカードとして置く失敗
+
+### NG
+
+- ヒーロー全体の空間を作る複合シーンを右カラムの画像カードへ縮め、左右をcropしている
+- 縦長の紙オブジェクトがWeb背景へ浮くカンプなのに、生成時の白背景ごと矩形画像として置いている
+- exploded layersやsemantic unitsを透明sceneにせず、白い画像板をCSSカードへ入れている
+- planner / designer / builderのコラージュがそれぞれ別の生成紙色を持ち、Web背景との継ぎ目が見える
+- `opaque_tone_matched` と宣言しただけで、四辺の色差や最終consumer cropを確認していない
+- 生成済み素材を使い切ることを優先し、source topologyと矛盾してもHTML/CSSへ進んでいる
+
+### 原因
+
+- generation unitだけを決め、source surface topologyを決めていない
+- section field / floating scene / contained artworkの違いをすべて「画像を置く枠」として処理している
+- alpha生成が難しいときの戻り先を、full-field sceneではなくopaque rectangleにしている
+- isolated assetの見た目だけで合格し、Web面との境界を検証していない
+
+### 修正
+
+- raster promptの前に `section_field` / `floating_scene` / `contained_artwork` / `tone_merged_object` / `source_visible_frame` をsource evidence付きで固定する
+- section fieldは、構造コピー用のcopy spaceを持つ `full_field_scene_plate` としてsection端までbleedさせる
+- floating sceneは、単体なら `transparent_foreground`、coupled objectsなら影込み `transparent_scene` として再生成する
+- contained artworkだけをcard content boxへ入れ、rasterはcontent box端までbleedさせる。CSSが外側の枠とpaddingを所有する
+- alphaが破綻する場合は、copy space込みfull-field scene、mask merge、実測tone matchの順に設計を戻す。sourceにないopaque cardへ逃げない
+- top/right/bottom/leftのedge policyと最終consumer cropを検査し、矛盾があれば `needs_surface_redesign` として画像生成へ差し戻す
 
 ---
 
@@ -349,13 +405,15 @@ Canvaテンプレート風を避ける。
 主役以外の要素を減らし、余白とアクセントカラーで広告品質にする。
 ```
 
-### レイヤーを重ねても元画像にならない場合
+### 切り抜き素材しかできていない場合
 
 ```text
-承認済みcanonical compositeを固定する。
-背景プレート、主役、装飾、アイコン、手書き文字、読ませる文字の所有レイヤーを定義する。
-再構成用レイヤーは同一キャンバスまたはmanifestの整数座標で配置する。
-manifestどおりに再合成し、decoded RGBAの全ピクセルを比較する。
-pixel_diff_count = 0かつmax_channel_delta = 0になるまで完了としない。
-フル画像コピーや意味領域を覆うresidualで差分を隠さない。
+canonical compositeを参照専用に戻す。
+全要素を raster_regenerate / css_svg_rebuild / real_text / omit に分類する。
+raster_regenerate対象は宣言した出力ビジュアル単位ごとに、元モックのピクセルを使わず新規生成する。
+静的一体構図は `card_artwork_plate` にまとめ、分割する場合だけ `split_evidence` を記録する。
+人物、商品、複雑なイラストは隠れた輪郭まで補完した透過素材にする。
+背景は人物、文字、CTA、装飾のないクリーンプレートにする。
+CSS/SVGと実テキストで再現できるものは画像生成しない。
+元背景色、文字片、隣接要素、alpha edge汚染があれば再生成する。
 ```
